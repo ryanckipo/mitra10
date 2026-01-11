@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Package, LayoutDashboard, Search } from 'lucide-react';
+import { Package, LayoutDashboard, Search, FileText } from 'lucide-react';
 
 export const Header = () => {
   const location = useLocation();
@@ -44,6 +44,17 @@ export const Header = () => {
             >
               <Search size={18} />
               <span className="hidden sm:inline">Tracking</span>
+            </Link>
+            <Link
+              to="/dokumentasi"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                isActive('/dokumentasi')
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              <FileText size={18} />
+              <span className="hidden sm:inline">Docs</span>
             </Link>
           </nav>
         </div>
