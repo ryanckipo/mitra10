@@ -4,20 +4,22 @@ interface StatsCardProps {
   title: string;
   value: number;
   icon: LucideIcon;
-  variant: 'default' | 'pending' | 'dikirim' | 'selesai';
+  variant: 'default' | 'pending' | 'packing' | 'dikirim' | 'selesai';
 }
 
 const variantStyles = {
   default: 'bg-card border border-border',
   pending: 'bg-muted/50 border border-muted',
-  dikirim: 'bg-warning/10 border border-warning/20',
+  packing: 'bg-warning/10 border border-warning/20',
+  dikirim: 'bg-primary/10 border border-primary/20',
   selesai: 'bg-success/10 border border-success/20',
 };
 
 const iconStyles = {
   default: 'bg-primary/10 text-primary',
   pending: 'bg-muted-foreground/10 text-muted-foreground',
-  dikirim: 'bg-warning/20 text-warning',
+  packing: 'bg-warning/20 text-warning',
+  dikirim: 'bg-primary/20 text-primary',
   selesai: 'bg-success/20 text-success',
 };
 

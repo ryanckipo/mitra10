@@ -3,7 +3,7 @@ import { Header } from '@/components/Header';
 import { StatusBadge } from '@/components/StatusBadge';
 import { usePengiriman } from '@/hooks/usePengiriman';
 import { Pengiriman } from '@/types/pengiriman';
-import { Search, Package, MapPin, User, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Package, MapPin, User, Clock, CheckCircle2, XCircle, PackageOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -82,13 +82,26 @@ const Tracking = () => {
 
                 {/* Details */}
                 <div className="p-6 space-y-4">
+                  {/* Items List */}
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                      <Package className="text-muted-foreground" size={20} />
+                      <PackageOpen className="text-muted-foreground" size={20} />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Nama Barang</p>
-                      <p className="font-medium text-foreground">{searchResult.nama_barang}</p>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Daftar Barang</p>
+                      {searchResult.items.length === 0 ? (
+                        <p className="text-sm italic text-muted-foreground">Belum ada barang ditambahkan</p>
+                      ) : (
+                        <div className="space-y-1 mt-1">
+                          {searchResult.items.map(item => (
+                            <div key={item.id} className="flex items-center gap-2 text-sm">
+                              <Package size={14} className="text-muted-foreground" />
+                              <span className="font-medium text-foreground">{item.nama_barang}</span>
+                              <span className="text-muted-foreground">x{item.jumlah}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -129,8 +142,8 @@ const Tracking = () => {
                 <div className="border-t border-border p-6">
                   <p className="text-sm font-medium text-foreground mb-4">Status Pengiriman</p>
                   <div className="flex items-center gap-2">
-                    {['Pending', 'Dikirim', 'Selesai'].map((status, index) => {
-                      const statusOrder = { Pending: 0, Dikirim: 1, Selesai: 2 };
+                    {['Pending', 'Packing', 'Dikirim', 'Selesai'].map((status, index) => {
+                      const statusOrder = { Pending: 0, Packing: 1, Dikirim: 2, Selesai: 3 };
                       const currentOrder = statusOrder[searchResult.status as keyof typeof statusOrder];
                       const isActive = index <= currentOrder;
                       
@@ -142,15 +155,17 @@ const Tracking = () => {
                                 ? status === 'Selesai' 
                                   ? 'bg-success text-success-foreground' 
                                   : status === 'Dikirim'
-                                    ? 'bg-warning text-warning-foreground'
-                                    : 'bg-muted-foreground text-primary-foreground'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : status === 'Packing'
+                                      ? 'bg-warning text-warning-foreground'
+                                      : 'bg-muted-foreground text-primary-foreground'
                                 : 'bg-muted text-muted-foreground'
                             }`}>
                               {index + 1}
                             </div>
-                            <span className="text-sm hidden sm:block">{status}</span>
+                            <span className="text-xs hidden sm:block">{status}</span>
                           </div>
-                          {index < 2 && (
+                          {index < 3 && (
                             <div className={`h-0.5 w-full mx-2 ${isActive && index < currentOrder ? 'bg-success' : 'bg-border'}`} />
                           )}
                         </div>
