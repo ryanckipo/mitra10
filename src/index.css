@@ -133,8 +133,12 @@
     @apply bg-muted text-muted-foreground;
   }
 
-  .status-dikirim {
+  .status-packing {
     @apply bg-warning/20 text-warning;
+  }
+
+  .status-dikirim {
+    @apply bg-primary/20 text-primary;
   }
 
   .status-selesai {

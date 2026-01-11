@@ -1,5 +1,5 @@
 import { StatusPengiriman } from '@/types/pengiriman';
-import { Package, Truck, CheckCircle2 } from 'lucide-react';
+import { Package, Truck, CheckCircle2, PackageOpen } from 'lucide-react';
 
 interface StatusBadgeProps {
   status: StatusPengiriman;
@@ -11,6 +11,11 @@ const statusConfig = {
     icon: Package,
     className: 'status-badge status-pending',
     label: 'Pending',
+  },
+  Packing: {
+    icon: PackageOpen,
+    className: 'status-badge status-packing',
+    label: 'Packing',
   },
   Dikirim: {
     icon: Truck,

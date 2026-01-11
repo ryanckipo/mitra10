@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Pengiriman, StatusPengiriman } from '@/types/pengiriman';
+import { Pengiriman, StatusPengiriman, BarangItem } from '@/types/pengiriman';
 
 const STORAGE_KEY = 'mitra10_pengiriman';
 
@@ -30,14 +30,14 @@ export const usePengiriman = () => {
     setPengirimanList(data);
   }, []);
 
-  // Add new pengiriman
-  const addPengiriman = useCallback((data: Omit<Pengiriman, 'id' | 'no_resi' | 'status' | 'created_at' | 'updated_at'>) => {
+  // Step 1: Create new resi (only tujuan + penerima, auto-generate resi)
+  const createResi = useCallback((data: { tujuan_toko: string; tanda_terima: string }) => {
     const newPengiriman: Pengiriman = {
       id: crypto.randomUUID(),
       no_resi: generateResi(),
-      nama_barang: data.nama_barang,
       tujuan_toko: data.tujuan_toko,
       tanda_terima: data.tanda_terima,
+      items: [],
       status: 'Pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -46,6 +46,45 @@ export const usePengiriman = () => {
     const updated = [newPengiriman, ...pengirimanList];
     saveToStorage(updated);
     return newPengiriman;
+  }, [pengirimanList, saveToStorage]);
+
+  // Step 2: Add item to existing resi (scan/sortir barang)
+  const addItemToResi = useCallback((resiId: string, namaBarang: string, jumlah: number = 1) => {
+    const updated = pengirimanList.map(p => {
+      if (p.id === resiId) {
+        const newItem: BarangItem = {
+          id: crypto.randomUUID(),
+          nama_barang: namaBarang,
+          jumlah,
+          added_at: new Date().toISOString(),
+        };
+        return { 
+          ...p, 
+          items: [...p.items, newItem],
+          status: 'Packing' as StatusPengiriman,
+          updated_at: new Date().toISOString() 
+        };
+      }
+      return p;
+    });
+    saveToStorage(updated);
+  }, [pengirimanList, saveToStorage]);
+
+  // Remove item from resi
+  const removeItemFromResi = useCallback((resiId: string, itemId: string) => {
+    const updated = pengirimanList.map(p => {
+      if (p.id === resiId) {
+        const newItems = p.items.filter(item => item.id !== itemId);
+        return { 
+          ...p, 
+          items: newItems,
+          status: newItems.length === 0 ? 'Pending' as StatusPengiriman : p.status,
+          updated_at: new Date().toISOString() 
+        };
+      }
+      return p;
+    });
+    saveToStorage(updated);
   }, [pengirimanList, saveToStorage]);
 
   // Update status
@@ -58,7 +97,7 @@ export const usePengiriman = () => {
     saveToStorage(updated);
   }, [pengirimanList, saveToStorage]);
 
-  // Mark as sent (Dikirim)
+  // Step 3: Mark as sent (Dikirim)
   const markAsDikirim = useCallback((id: string) => {
     updateStatus(id, 'Dikirim');
   }, [updateStatus]);
@@ -83,16 +122,19 @@ export const usePengiriman = () => {
   const getStats = useCallback(() => {
     const total = pengirimanList.length;
     const pending = pengirimanList.filter(p => p.status === 'Pending').length;
+    const packing = pengirimanList.filter(p => p.status === 'Packing').length;
     const dikirim = pengirimanList.filter(p => p.status === 'Dikirim').length;
     const selesai = pengirimanList.filter(p => p.status === 'Selesai').length;
     
-    return { total, pending, dikirim, selesai };
+    return { total, pending, packing, dikirim, selesai };
   }, [pengirimanList]);
 
   return {
     pengirimanList,
     isLoading,
-    addPengiriman,
+    createResi,
+    addItemToResi,
+    removeItemFromResi,
     updateStatus,
     markAsDikirim,
     markAsSelesai,

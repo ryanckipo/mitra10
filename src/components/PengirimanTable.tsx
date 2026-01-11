@@ -1,6 +1,6 @@
 import { Pengiriman } from '@/types/pengiriman';
 import { StatusBadge } from './StatusBadge';
-import { Truck, CheckCircle2, Package, Clock, Trash2 } from 'lucide-react';
+import { Truck, CheckCircle2, Package, Clock, Trash2, X, PackageOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -9,9 +9,10 @@ interface PengirimanTableProps {
   onMarkDikirim: (id: string) => void;
   onMarkSelesai: (id: string) => void;
   onDelete: (id: string) => void;
+  onRemoveItem?: (resiId: string, itemId: string) => void;
 }
 
-export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai, onDelete }: PengirimanTableProps) => {
+export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai, onDelete, onRemoveItem }: PengirimanTableProps) => {
   if (data.length === 0) {
     return (
       <div className="bg-card rounded-xl border border-border p-12 text-center">
@@ -33,9 +34,9 @@ export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai, onDelete }
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">No. Resi</th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">Nama Barang</th>
               <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">Tujuan Toko</th>
               <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">Penerima</th>
+              <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">Barang</th>
               <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">Status</th>
               <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">Update</th>
               <th className="text-left px-4 py-3 text-sm font-semibold text-foreground">Aksi</th>
@@ -53,9 +54,32 @@ export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai, onDelete }
                     {item.no_resi}
                   </code>
                 </td>
-                <td className="px-4 py-3 text-sm text-foreground">{item.nama_barang}</td>
                 <td className="px-4 py-3 text-sm text-foreground">{item.tujuan_toko}</td>
                 <td className="px-4 py-3 text-sm text-muted-foreground">{item.tanda_terima}</td>
+                <td className="px-4 py-3">
+                  {item.items.length === 0 ? (
+                    <span className="text-xs text-muted-foreground italic">Belum ada barang</span>
+                  ) : (
+                    <div className="space-y-1">
+                      {item.items.map(barang => (
+                        <div key={barang.id} className="flex items-center gap-1.5 text-xs">
+                          <PackageOpen size={12} className="text-muted-foreground" />
+                          <span className="text-foreground">{barang.nama_barang}</span>
+                          <span className="text-muted-foreground">x{barang.jumlah}</span>
+                          {(item.status === 'Pending' || item.status === 'Packing') && onRemoveItem && (
+                            <button
+                              onClick={() => onRemoveItem(item.id, barang.id)}
+                              className="text-destructive hover:text-destructive/80 ml-1"
+                              title="Hapus barang"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={item.status} />
                 </td>
@@ -66,35 +90,38 @@ export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai, onDelete }
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {item.status === 'Pending' && (
+                  <div className="flex flex-wrap gap-2">
+                    {/* Only allow shipping if status is Packing and has items */}
+                    {item.status === 'Packing' && item.items.length > 0 && (
+                      <button
+                        onClick={() => onMarkDikirim(item.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/20 text-primary hover:bg-primary/30 transition-colors"
+                      >
+                        <Truck size={14} />
+                        Kirim
+                      </button>
+                    )}
+                    {item.status === 'Dikirim' && (
+                      <button
+                        onClick={() => onMarkSelesai(item.id)}
+                        className="btn-success inline-flex items-center gap-1.5"
+                      >
+                        <CheckCircle2 size={14} />
+                        Selesai
+                      </button>
+                    )}
                     <button
-                      onClick={() => onMarkDikirim(item.id)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-warning/20 text-warning hover:bg-warning/30 transition-colors"
+                      onClick={() => {
+                        if (confirm('Yakin ingin menghapus pengiriman ini?')) {
+                          onDelete(item.id);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors"
                     >
-                      <Truck size={14} />
-                      Kirim
+                      <Trash2 size={14} />
+                      Hapus
                     </button>
-                  )}
-                  {item.status === 'Dikirim' && (
-                    <button
-                      onClick={() => onMarkSelesai(item.id)}
-                      className="btn-success inline-flex items-center gap-1.5"
-                    >
-                      <CheckCircle2 size={14} />
-                      Selesai
-                    </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      if (confirm('Yakin ingin menghapus pengiriman ini?')) {
-                        onDelete(item.id);
-                      }
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors ml-2"
-                  >
-                    <Trash2 size={14} />
-                    Hapus
-                  </button>
+                  </div>
                 </td>
               </tr>
             ))}

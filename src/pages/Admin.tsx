@@ -1,18 +1,22 @@
 import { usePengiriman } from '@/hooks/usePengiriman';
 import { Header } from '@/components/Header';
 import { StatsCard } from '@/components/StatsCard';
-import { PengirimanForm } from '@/components/PengirimanForm';
+import { CreateResiForm } from '@/components/CreateResiForm';
+import { AddItemForm } from '@/components/AddItemForm';
 import { PengirimanTable } from '@/components/PengirimanTable';
-import { Package, Truck, CheckCircle2, LayoutList } from 'lucide-react';
+import { Package, Truck, CheckCircle2, LayoutList, PackageOpen } from 'lucide-react';
 
 const Admin = () => {
   const { 
     pengirimanList, 
     isLoading, 
-    addPengiriman, 
+    createResi,
+    addItemToResi,
+    removeItemFromResi,
     markAsDikirim, 
     markAsSelesai, 
     deletePengiriman,
+    findByResi,
     getStats 
   } = usePengiriman();
 
@@ -40,9 +44,9 @@ const Admin = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <StatsCard 
-            title="Total Pengiriman" 
+            title="Total" 
             value={stats.total} 
             icon={LayoutList} 
             variant="default" 
@@ -54,7 +58,13 @@ const Admin = () => {
             variant="pending" 
           />
           <StatsCard 
-            title="Sedang Dikirim" 
+            title="Packing" 
+            value={stats.packing} 
+            icon={PackageOpen} 
+            variant="packing" 
+          />
+          <StatsCard 
+            title="Dikirim" 
             value={stats.dikirim} 
             icon={Truck} 
             variant="dikirim" 
@@ -69,13 +79,25 @@ const Admin = () => {
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Form */}
-          <div className="lg:col-span-1 animate-slide-up">
-            <PengirimanForm onSubmit={addPengiriman} />
+          {/* Forms Column */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Step 1: Create Resi */}
+            <div className="animate-slide-up">
+              <CreateResiForm onSubmit={createResi} />
+            </div>
+            
+            {/* Step 2: Add Items */}
+            <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+              <AddItemForm 
+                pengirimanList={pengirimanList}
+                onFindResi={findByResi}
+                onAddItem={addItemToResi}
+              />
+            </div>
           </div>
 
           {/* Table */}
-          <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: '200ms' }}>
             <div className="flex items-center gap-3 mb-4">
               <h2 className="font-display font-semibold text-foreground">Daftar Pengiriman</h2>
               <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
@@ -87,6 +109,7 @@ const Admin = () => {
               onMarkDikirim={markAsDikirim}
               onMarkSelesai={markAsSelesai}
               onDelete={deletePengiriman}
+              onRemoveItem={removeItemFromResi}
             />
           </div>
         </div>
