@@ -12,6 +12,7 @@ const Admin = () => {
     addPengiriman, 
     markAsDikirim, 
     markAsSelesai, 
+    deletePengiriman,
     getStats 
   } = usePengiriman();
 
@@ -85,6 +86,7 @@ const Admin = () => {
               data={pengirimanList} 
               onMarkDikirim={markAsDikirim}
               onMarkSelesai={markAsSelesai}
+              onDelete={deletePengiriman}
             />
           </div>
         </div>
