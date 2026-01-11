@@ -68,6 +68,12 @@ export const usePengiriman = () => {
     updateStatus(id, 'Selesai');
   }, [updateStatus]);
 
+  // Delete pengiriman
+  const deletePengiriman = useCallback((id: string) => {
+    const updated = pengirimanList.filter(p => p.id !== id);
+    saveToStorage(updated);
+  }, [pengirimanList, saveToStorage]);
+
   // Search by resi
   const findByResi = useCallback((resi: string): Pengiriman | undefined => {
     return pengirimanList.find(p => p.no_resi.toLowerCase() === resi.toLowerCase());
@@ -90,6 +96,7 @@ export const usePengiriman = () => {
     updateStatus,
     markAsDikirim,
     markAsSelesai,
+    deletePengiriman,
     findByResi,
     getStats,
   };

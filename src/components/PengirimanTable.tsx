@@ -1,6 +1,6 @@
 import { Pengiriman } from '@/types/pengiriman';
 import { StatusBadge } from './StatusBadge';
-import { Truck, CheckCircle2, Package, Clock } from 'lucide-react';
+import { Truck, CheckCircle2, Package, Clock, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -8,9 +8,10 @@ interface PengirimanTableProps {
   data: Pengiriman[];
   onMarkDikirim: (id: string) => void;
   onMarkSelesai: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai }: PengirimanTableProps) => {
+export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai, onDelete }: PengirimanTableProps) => {
   if (data.length === 0) {
     return (
       <div className="bg-card rounded-xl border border-border p-12 text-center">
@@ -83,9 +84,17 @@ export const PengirimanTable = ({ data, onMarkDikirim, onMarkSelesai }: Pengirim
                       Selesai
                     </button>
                   )}
-                  {item.status === 'Selesai' && (
-                    <span className="text-xs text-muted-foreground">Selesai</span>
-                  )}
+                  <button
+                    onClick={() => {
+                      if (confirm('Yakin ingin menghapus pengiriman ini?')) {
+                        onDelete(item.id);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors ml-2"
+                  >
+                    <Trash2 size={14} />
+                    Hapus
+                  </button>
                 </td>
               </tr>
             ))}
